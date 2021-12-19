@@ -5,6 +5,7 @@ import java.util.Random;
 
 public class Board {
     private Tile[][] tiles = new Tile[4][4];
+    private int score = 0;
 
     Board() {
         for (int i = 0; i < 4; i++) {
@@ -70,8 +71,9 @@ public class Board {
             for (int j = 0; j < 3; j++) {
                 if (tiles[i][j].getValue() == tiles[i][j+1].getValue() && tiles[i][j].getValue() != 0) {
                     tiles[i][j].update();
-                    tiles[i][j+1] = new Tile();
+                    tiles[i][j+1].reset();
                     combined = true;
+                    score += tiles[i][j].getValue();
                 }
             }
         }
@@ -155,6 +157,10 @@ public class Board {
         return true;
     }
 
+    public int getScore() {
+        return score;
+    }
+
     public static void main(String[] args) {
 
         Board b = Board.losingPosition();
@@ -170,7 +176,6 @@ public class Board {
                 ts[i][j] = new Tile((int) Math.pow(2, (i+j+1)));
             }
         }
-        //ts[0][0].update();
         return new Board(ts);
     }
 
