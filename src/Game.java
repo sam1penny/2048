@@ -9,21 +9,33 @@ public class Game extends JPanel implements KeyListener {
     public static JFrame frame = new JFrame("2^11");
     public static Game newGame = new Game();
     public static Board board = new Board();
+
+    private int highScore = 0;
+
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 800;
+    public static final int X_DISTTOBOARD = 100;
+    public static final int Y_DISTTOBOARD = 100;
+    public static final int BOARD_SIZE = 600;
+    public static final int CELL_SIZE = (BOARD_SIZE / board.gridSize());;
+
     public static final Map<String, Font> fonts = Map.ofEntries(
-            entry("score", new Font(Font.SANS_SERIF, Font.BOLD, 20)),
-            entry("tile", new Font(Font.DIALOG, Font.BOLD, 60)),
+            entry("info", new Font(Font.SANS_SERIF, Font.BOLD, 20)),
+            entry("tile", new Font(Font.DIALOG, Font.BOLD, CELL_SIZE / 3)),
             entry("gameover", new Font(Font.SANS_SERIF, Font.BOLD, 80))
-            );
+    );
+
+
 
     public static void main(String[] args) {
+        //Game newGame = new Game();
         newGame.setBackground(Color.black);
         frame.addKeyListener(newGame);
         frame.getContentPane().add(newGame);
-        frame.setSize(800, 800);
+        frame.setSize(newGame.WIDTH, newGame.HEIGHT);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-
         board.spawnNew();
         board.spawnNew();
     }
@@ -34,23 +46,25 @@ public class Game extends JPanel implements KeyListener {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        g2d.setPaint(new Color(255,255,255));
-        g2d.setFont(fonts.get("score"));
-        g2d.drawString("Score: " + board.getScore(), 100,50);
+        g2d.setPaint(Color.white);
+        g2d.setFont(fonts.get("info"));
+        g2d.drawString("Score: " + board.getScore(), X_DISTTOBOARD,Y_DISTTOBOARD - 50);
+        g2d.drawString("High Score: " + highScore, X_DISTTOBOARD + BOARD_SIZE - 150,Y_DISTTOBOARD - 50);
 
-        g2d.setPaint(new Color(120,120,120));
-        g2d.fillRect(80, 80, 640, 640);
+        //outer rectangle
+        //g2d.setPaint(new Color(120,120,120));
+        //g2d.fillRect(X_DISTTOBOARD - 20, X_DISTTOBOARD - 20, BOARD_SIZE + 40, BOARD_SIZE + 40);
 
         //draw tiles
         Tile[][] tiles = board.getTiles();
         for (int y = 0; y < tiles.length; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
                 g2d.setPaint(tiles[y][x].getColour());
-                g2d.fillRect(100 + x*150, 100 + y*150, 150, 150);
+                g2d.fillRect(X_DISTTOBOARD + x * CELL_SIZE, Y_DISTTOBOARD + y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 if (!tiles[y][x].isEmpty()) {
                     g2d.setPaint(Color.white);
                     g2d.setFont(fonts.get("tile"));
-                    drawCenteredString(g2d, String.valueOf(tiles[y][x].getValue()) , new Rectangle(100 + x*150, 100 + y*150, 150, 150), g2d.getFont());
+                    drawCenteredString(g2d, String.valueOf(tiles[y][x].getValue()), new Rectangle(X_DISTTOBOARD + x * CELL_SIZE, Y_DISTTOBOARD + y*CELL_SIZE, CELL_SIZE, CELL_SIZE), g2d.getFont());
                 }
 
             }
@@ -58,15 +72,20 @@ public class Game extends JPanel implements KeyListener {
         //draw grid
         g2d.setPaint(Color.black);
         for (int i = 0; i < 5; i++) {
-            g2d.drawLine(100+150*i, 100, 100+150*i,700);
-            g2d.drawLine(100, 100+150*i, 700,100+150*i);
+            g2d.drawLine(X_DISTTOBOARD+CELL_SIZE*i, Y_DISTTOBOARD, X_DISTTOBOARD+CELL_SIZE*i,Y_DISTTOBOARD + BOARD_SIZE);
+            g2d.drawLine(X_DISTTOBOARD, Y_DISTTOBOARD+CELL_SIZE*i, X_DISTTOBOARD + BOARD_SIZE,Y_DISTTOBOARD+CELL_SIZE*i);
         }
 
         if (board.gameOver()) {
             g2d.setFont(fonts.get("gameover"));
-            drawCenteredString(g2d, "GAME OVER", new Rectangle(300,300, 200, 200), g2d.getFont());
-
+            drawCenteredString(g2d, "GAME OVER", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3), g2d.getFont());
         }
+
+        //draw space to reset
+        g2d.setFont(fonts.get("info"));
+        g2d.setPaint(Color.white);
+        drawCenteredString(g2d, "press space to restart", new Rectangle(X_DISTTOBOARD, Y_DISTTOBOARD + BOARD_SIZE, BOARD_SIZE, 100),g2d.getFont());
+
 
     }
 
@@ -120,7 +139,13 @@ public class Game extends JPanel implements KeyListener {
                 frame.repaint();
             }
         }
-
+        else if (e.getKeyCode() == 32) {
+            board = new Board();
+            board.spawnNew();
+            board.spawnNew();
+            frame.repaint();
+        }
+        highScore = Math.max(highScore, board.getScore());
     }
 
     @Override

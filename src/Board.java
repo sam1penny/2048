@@ -161,6 +161,10 @@ public class Board {
         return score;
     }
 
+    public int gridSize() {
+        return 4;
+    }
+
     public static void main(String[] args) {
 
         Board b = Board.losingPosition();
@@ -176,6 +180,11 @@ public class Board {
                 ts[i][j] = new Tile((int) Math.pow(2, (i+j+1)));
             }
         }
+        ts[3][3].update();
+        ts[3][3].update();
+        ts[3][3].update();
+        ts[3][3].update();
+
         return new Board(ts);
     }
 
