@@ -11,40 +11,20 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class BoardTest {
     private static class TestingBoard extends Board {
+
         TestingBoard(int n) {
             super(n);
         }
-        TestingBoard(Tile[][] start) {
-            super(start.length);
-            tiles = new Tile[size][size];
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
-                    tiles[i][j] = start[i][j];
-                }
-            }
+
+        TestingBoard(Tile[][] startGrid) {
+            super(startGrid);
         }
-
-        public static TestingBoard losingPosition() {
-            Tile[][] ts = new Tile[4][4];
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    ts[i][j] = new Tile((int) Math.pow(2, (i+j+1)));
-                }
-            }
-            ts[3][3].update();
-            ts[3][3].update();
-            ts[3][3].update();
-            ts[3][3].update();
-
-            return new TestingBoard(ts);
-        }
-
 
         @Override
         public String toString() {
             String s = "";
-            for (int i = 0; i < size; i++) {
-                s += Arrays.toString(tiles[i]) + "\n";
+            for (int i = 0; i < getSize(); i++) {
+                s += Arrays.toString(getTiles()[i]) + "\n";
             }
             return s;
         }
@@ -52,14 +32,11 @@ public class BoardTest {
     }
     @Test
     public void spawnNew_generates2or4InRandomPosition() {
-        // ARRANGE
         TestingBoard b = new TestingBoard(4);
 
-        // ACT
         b.spawnNew();
 
 
-        // ASSERT
         int count = 0;
         for (int i = 0; i < b.getSize(); i++) {
             for (int j = 0; j < b.getSize(); j++) {
@@ -72,7 +49,15 @@ public class BoardTest {
     }
     @Test
     public void gameOver_isTrue_whenGameOver() {
-        TestingBoard b = TestingBoard.losingPosition();
+
+        Tile[][] tiles = new Tile[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                tiles[i][j] = new Tile((int) Math.pow(2, i+j+1));
+            }
+        }
+        TestingBoard b = new TestingBoard(tiles);
+
 
         assertThat(b.gameOver()).isTrue();
     }
@@ -89,7 +74,6 @@ public class BoardTest {
         startPos[0][1].update();
 
         TestingBoard b = new TestingBoard(startPos);
-        System.out.println(b);
 
         assertThat(b.gameOver()).isFalse();
     }

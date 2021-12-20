@@ -1,15 +1,14 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 
 public class Board {
-    protected Tile[][] tiles;
-    protected int score = 0;
-    protected int size;
+    private Tile[][] tiles;
+    private int score = 0;
+    private int size;
 
     Board(int n) {
         size = n;
@@ -17,6 +16,20 @@ public class Board {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 tiles[i][j] = new Tile();
+            }
+        }
+    }
+
+    // for testing purposes
+    Board(Tile[][] startGrid) {
+        if (startGrid.length != startGrid[0].length) {
+            throw new IllegalArgumentException();
+        }
+        size = startGrid.length;
+        tiles = new Tile[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                tiles[i][j] = startGrid[i][j];
             }
         }
     }

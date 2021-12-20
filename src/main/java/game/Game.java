@@ -28,7 +28,7 @@ public class Game extends JPanel implements KeyListener {
         setBackground(Color.black);
         frame.addKeyListener(this);
         frame.getContentPane().add(this);
-        frame.setSize(WIDTH, HEIGHT+200);
+        frame.setSize(WIDTH, HEIGHT);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
@@ -54,14 +54,12 @@ public class Game extends JPanel implements KeyListener {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        //draw scoring info
         g2d.setPaint(Color.white);
         g2d.setFont(fonts.get("info"));
         g2d.drawString("Score: " + board.getScore(), X_DISTTOBOARD,Y_DISTTOBOARD - 50);
         g2d.drawString("High Score: " + highScore, X_DISTTOBOARD + BOARD_SIZE - 150,Y_DISTTOBOARD - 50);
 
-        //outer rectangle
-        //g2d.setPaint(new Color(120,120,120));
-        //g2d.fillRect(X_DISTTOBOARD - 20, X_DISTTOBOARD - 20, BOARD_SIZE + 40, BOARD_SIZE + 40);
 
         //draw tiles
         Tile[][] tiles = board.getTiles();
@@ -85,6 +83,7 @@ public class Game extends JPanel implements KeyListener {
             g2d.drawLine(X_DISTTOBOARD, Y_DISTTOBOARD+CELL_SIZE*i, X_DISTTOBOARD + BOARD_SIZE - error,Y_DISTTOBOARD+CELL_SIZE*i);
         }
 
+        //draw game over / game won
         if (board.gameWon()) {
             g2d.setFont(fonts.get("gameover"));
             drawCenteredString(g2d, "YOU WIN!", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3), g2d.getFont());
@@ -95,7 +94,7 @@ public class Game extends JPanel implements KeyListener {
             drawCenteredString(g2d, "GAME OVER", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3), g2d.getFont());
         }
 
-        //draw space to reset
+        //display controls
         g2d.setFont(fonts.get("info"));
         g2d.setPaint(Color.white);
         drawCenteredString(g2d, "press space to restart | press number keys to change grid size", new Rectangle(X_DISTTOBOARD, Y_DISTTOBOARD + BOARD_SIZE, BOARD_SIZE, 60),g2d.getFont());
@@ -156,20 +155,11 @@ public class Game extends JPanel implements KeyListener {
                 frame.repaint();
             }
         }
-        else {
-            switch (e.getKeyChar()) {
-                case '2' -> size = 2;
-                case '3' -> size = 3;
-                case '4' -> size = 4;
-                case '5' -> size = 5;
-                case '6' -> size = 6;
-                case '7' -> size = 7;
-                case '8' -> size = 8;
-                case '9' -> size = 9;
+        else if (Character.isDigit(e.getKeyChar()) && Character.getNumericValue(e.getKeyChar()) > 1) {
+                size = Character.getNumericValue(e.getKeyChar());
+                restart();
             }
-            //System.out.println(Integer.parseInt(String.valueOf(e.getKeyChar())));
-            restart();
-        }
+
         highScore = Math.max(highScore, board.getScore());
     }
 
