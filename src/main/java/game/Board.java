@@ -1,24 +1,22 @@
+package game;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+
 public class Board {
-    private Tile[][] tiles = new Tile[4][4];
-    private int score = 0;
+    protected Tile[][] tiles;
+    protected int score = 0;
+    protected int size;
 
-    Board() {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+    Board(int n) {
+        size = n;
+        tiles = new Tile[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 tiles[i][j] = new Tile();
-            }
-        }
-    }
-
-    Board(Tile[][] start) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                tiles[i][j] = start[i][j];
             }
         }
     }
@@ -29,8 +27,8 @@ public class Board {
 
     public void spawnNew() {
         List<int[]> possibleLocations = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 if (tiles[i][j].isEmpty()) {
                     possibleLocations.add(new int[] {i, j});
                 }
@@ -45,11 +43,11 @@ public class Board {
 
     }
 
-    public boolean leftMoveUp() {
+    private boolean leftMoveUp() {
         boolean moved = false;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < size; i++) {
             int moveAlong = 0;
-            for (int j = 0; j < 4; j++) {
+            for (int j = 0; j < size; j++) {
                 if (tiles[i][j].getValue() == 0) {
                     moveAlong += 1;
                 }
@@ -65,10 +63,10 @@ public class Board {
         return moved;
     }
 
-    public boolean leftCombine() {
+    private boolean leftCombine() {
         boolean combined = false;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size - 1; j++) {
                 if (tiles[i][j].getValue() == tiles[i][j+1].getValue() && tiles[i][j].getValue() != 0) {
                     tiles[i][j].update();
                     tiles[i][j+1].reset();
@@ -80,21 +78,21 @@ public class Board {
         return combined;
     }
 
-    public void reverse() {
+    private void reverse() {
         Tile temp;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 2; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size / 2; j++) {
                 temp = tiles[i][j];
-                tiles[i][j] = tiles[i][3-j];
-                tiles[i][3-j] = temp;
+                tiles[i][j] = tiles[i][size-1-j];
+                tiles[i][size-1-j] = temp;
             }
         }
     }
 
-    public void transpose() {
+    private void transpose() {
         Tile temp;
-        for (int i = 0; i < 4; i++) {
-            for (int j = i+1; j < 4; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = i+1; j < size; j++) {
                 temp = tiles[i][j];
                 tiles[i][j] = tiles[j][i];
                 tiles[j][i] = temp;
@@ -130,13 +128,24 @@ public class Board {
         return moved;
     }
 
+    public boolean gameWon() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (tiles[i][j].getValue() == 2048) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean gameOver() {
         return isFull() && noMovesLeft();
     }
 
     public boolean isFull() {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 if (tiles[i][j].getValue() == 0) {
                     return false;
                 }
@@ -146,9 +155,9 @@ public class Board {
     }
 
     //only valid when full
-    public boolean noMovesLeft() {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4-1; j++) {
+    private boolean noMovesLeft() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size-1; j++) {
                 if (tiles[i][j].getValue() == tiles[i][j+1].getValue()  || tiles[j][i].getValue() == tiles[j+1][i].getValue()) {
                     return false;
                 }
@@ -161,40 +170,10 @@ public class Board {
         return score;
     }
 
-    public int gridSize() {
-        return 4;
+    public int getSize() {
+        return size;
     }
 
-    public static void main(String[] args) {
 
-        Board b = Board.losingPosition();
-        System.out.println(b);
-        System.out.println(b.gameOver());
-
-    }
-
-    public static Board losingPosition() {
-        Tile[][] ts = new Tile[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                ts[i][j] = new Tile((int) Math.pow(2, (i+j+1)));
-            }
-        }
-        ts[3][3].update();
-        ts[3][3].update();
-        ts[3][3].update();
-        ts[3][3].update();
-
-        return new Board(ts);
-    }
-
-    @Override
-    public String toString() {
-        String s = "";
-        for (int i = 0; i < 4; i++) {
-            s += Arrays.toString(tiles[i]) + "\n";
-        }
-        return s;
-    }
 
 }

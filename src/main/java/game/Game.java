@@ -1,3 +1,5 @@
+package game;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -5,42 +7,48 @@ import java.awt.event.KeyListener;
 import java.util.Map;
 import static java.util.Map.entry;
 
-public class Game extends JPanel implements KeyListener {
-    public static JFrame frame = new JFrame("2^11");
-    public static Game newGame = new Game();
-    public static Board board = new Board();
 
+public class Game extends JPanel implements KeyListener {
+    private JFrame frame = new JFrame("2^11");
+    private int size;
+    private Board board;
     private int highScore = 0;
 
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 800;
-    public static final int X_DISTTOBOARD = 100;
-    public static final int Y_DISTTOBOARD = 100;
-    public static final int BOARD_SIZE = 600;
-    public static final int CELL_SIZE = (BOARD_SIZE / board.gridSize());;
+    private final int WIDTH = 800;
+    private final int HEIGHT = 800;
+    private final int X_DISTTOBOARD = 100;
+    private final int Y_DISTTOBOARD = 100;
+    private final int BOARD_SIZE = 600;
+    private int CELL_SIZE;
 
-    public static final Map<String, Font> fonts = Map.ofEntries(
-            entry("info", new Font(Font.SANS_SERIF, Font.BOLD, 20)),
-            entry("tile", new Font(Font.DIALOG, Font.BOLD, CELL_SIZE / 3)),
-            entry("gameover", new Font(Font.SANS_SERIF, Font.BOLD, 80))
-    );
+    private Map<String, Font> fonts;
 
-
-
-    public static void main(String[] args) {
-        //Game newGame = new Game();
-        newGame.setBackground(Color.black);
-        frame.addKeyListener(newGame);
-        frame.getContentPane().add(newGame);
-        frame.setSize(newGame.WIDTH, newGame.HEIGHT);
+    Game(int n) {
+        size = n;
+        setBackground(Color.black);
+        frame.addKeyListener(this);
+        frame.getContentPane().add(this);
+        frame.setSize(WIDTH, HEIGHT+200);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        board.spawnNew();
-        board.spawnNew();
+
+        restart();
+
     }
 
-
+    public void restart() {
+        board = new Board(size);
+        board.spawnNew();
+        board.spawnNew();
+        frame.repaint();
+        CELL_SIZE = (BOARD_SIZE / board.getSize());
+        fonts = Map.ofEntries(
+                entry("info", new Font(Font.SANS_SERIF, Font.BOLD, 20)),
+                entry("tile", new Font(Font.DIALOG, Font.BOLD, CELL_SIZE / 3)),
+                entry("gameover", new Font(Font.SANS_SERIF, Font.BOLD, 80))
+        );
+    }
 
     public void paint(Graphics g) {
         super.paint(g);
@@ -57,8 +65,8 @@ public class Game extends JPanel implements KeyListener {
 
         //draw tiles
         Tile[][] tiles = board.getTiles();
-        for (int y = 0; y < tiles.length; y++) {
-            for (int x = 0; x < tiles[0].length; x++) {
+        for (int y = 0; y < board.getSize(); y++) {
+            for (int x = 0; x < board.getSize(); x++) {
                 g2d.setPaint(tiles[y][x].getColour());
                 g2d.fillRect(X_DISTTOBOARD + x * CELL_SIZE, Y_DISTTOBOARD + y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 if (!tiles[y][x].isEmpty()) {
@@ -71,9 +79,15 @@ public class Game extends JPanel implements KeyListener {
         }
         //draw grid
         g2d.setPaint(Color.black);
-        for (int i = 0; i < 5; i++) {
-            g2d.drawLine(X_DISTTOBOARD+CELL_SIZE*i, Y_DISTTOBOARD, X_DISTTOBOARD+CELL_SIZE*i,Y_DISTTOBOARD + BOARD_SIZE);
-            g2d.drawLine(X_DISTTOBOARD, Y_DISTTOBOARD+CELL_SIZE*i, X_DISTTOBOARD + BOARD_SIZE,Y_DISTTOBOARD+CELL_SIZE*i);
+        int error = BOARD_SIZE % board.getSize();
+        for (int i = 0; i <= size; i++) {
+            g2d.drawLine(X_DISTTOBOARD+CELL_SIZE*i, Y_DISTTOBOARD, X_DISTTOBOARD+CELL_SIZE*i,Y_DISTTOBOARD + BOARD_SIZE - error);
+            g2d.drawLine(X_DISTTOBOARD, Y_DISTTOBOARD+CELL_SIZE*i, X_DISTTOBOARD + BOARD_SIZE - error,Y_DISTTOBOARD+CELL_SIZE*i);
+        }
+
+        if (board.gameWon()) {
+            g2d.setFont(fonts.get("gameover"));
+            drawCenteredString(g2d, "YOU WIN!", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3), g2d.getFont());
         }
 
         if (board.gameOver()) {
@@ -84,7 +98,7 @@ public class Game extends JPanel implements KeyListener {
         //draw space to reset
         g2d.setFont(fonts.get("info"));
         g2d.setPaint(Color.white);
-        drawCenteredString(g2d, "press space to restart", new Rectangle(X_DISTTOBOARD, Y_DISTTOBOARD + BOARD_SIZE, BOARD_SIZE, 100),g2d.getFont());
+        drawCenteredString(g2d, "press space to restart | press number keys to change grid size", new Rectangle(X_DISTTOBOARD, Y_DISTTOBOARD + BOARD_SIZE, BOARD_SIZE, 60),g2d.getFont());
 
 
     }
@@ -107,10 +121,13 @@ public class Game extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (board.gameOver()) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            restart();
+        }
+        else if (board.gameOver() || board.gameWon()) {
             return;
         }
-        if (Character.toLowerCase(e.getKeyChar()) == 'w' || e.getKeyCode() == KeyEvent.VK_UP) {
+        else if (Character.toLowerCase(e.getKeyChar()) == 'w' || e.getKeyCode() == KeyEvent.VK_UP) {
             boolean moved = board.up();
             if (moved) {
                 board.spawnNew();
@@ -139,11 +156,19 @@ public class Game extends JPanel implements KeyListener {
                 frame.repaint();
             }
         }
-        else if (e.getKeyCode() == 32) {
-            board = new Board();
-            board.spawnNew();
-            board.spawnNew();
-            frame.repaint();
+        else {
+            switch (e.getKeyChar()) {
+                case '2' -> size = 2;
+                case '3' -> size = 3;
+                case '4' -> size = 4;
+                case '5' -> size = 5;
+                case '6' -> size = 6;
+                case '7' -> size = 7;
+                case '8' -> size = 8;
+                case '9' -> size = 9;
+            }
+            //System.out.println(Integer.parseInt(String.valueOf(e.getKeyChar())));
+            restart();
         }
         highScore = Math.max(highScore, board.getScore());
     }

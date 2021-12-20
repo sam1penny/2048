@@ -1,3 +1,5 @@
+package game;
+
 import java.awt.*;
 import java.util.Map;
 import static java.util.Map.entry;
