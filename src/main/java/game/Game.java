@@ -1,9 +1,17 @@
 package game;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
 import java.util.Map;
 import static java.util.Map.entry;
 
@@ -70,7 +78,7 @@ public class Game extends JPanel implements KeyListener {
                 if (!tiles[y][x].isEmpty()) {
                     g2d.setPaint(Color.white);
                     g2d.setFont(fonts.get("tile"));
-                    drawCenteredString(g2d, String.valueOf(tiles[y][x].getValue()), new Rectangle(X_DISTTOBOARD + x * CELL_SIZE, Y_DISTTOBOARD + y*CELL_SIZE, CELL_SIZE, CELL_SIZE), g2d.getFont());
+                    drawCenteredString(g2d, String.valueOf(tiles[y][x].getValue()), new Rectangle(X_DISTTOBOARD + x * CELL_SIZE, Y_DISTTOBOARD + y*CELL_SIZE, CELL_SIZE, CELL_SIZE));
                 }
 
             }
@@ -86,33 +94,30 @@ public class Game extends JPanel implements KeyListener {
         //draw game over / game won
         if (board.gameWon()) {
             g2d.setFont(fonts.get("gameover"));
-            drawCenteredString(g2d, "YOU WIN!", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3), g2d.getFont());
+            drawCenteredString(g2d, "YOU WIN!", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3));
         }
 
         if (board.gameOver()) {
             g2d.setFont(fonts.get("gameover"));
-            drawCenteredString(g2d, "GAME OVER", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3), g2d.getFont());
+            drawCenteredString(g2d, "GAME OVER", new Rectangle(X_DISTTOBOARD + BOARD_SIZE / 3 , Y_DISTTOBOARD + BOARD_SIZE / 3, BOARD_SIZE / 3, BOARD_SIZE / 3));
         }
 
         //display controls
         g2d.setFont(fonts.get("info"));
         g2d.setPaint(Color.white);
-        drawCenteredString(g2d, "press space to restart | press number keys to change grid size", new Rectangle(X_DISTTOBOARD, Y_DISTTOBOARD + BOARD_SIZE, BOARD_SIZE, 60),g2d.getFont());
+        drawCenteredString(g2d, "press space to restart | press number keys to change grid size", new Rectangle(X_DISTTOBOARD, Y_DISTTOBOARD + BOARD_SIZE, BOARD_SIZE, 60));
 
 
     }
 
-    public void drawCenteredString(Graphics g, String text, Rectangle rect, Font font) {
-        // Get the FontMetrics
-        FontMetrics metrics = g.getFontMetrics(font);
-        // Determine the X coordinate for the text
+    public void drawCenteredString(Graphics2D g2d, String text, Rectangle rect) {
+        FontMetrics metrics = g2d.getFontMetrics(g2d.getFont());
+
         int x = rect.x + (rect.width - metrics.stringWidth(text)) / 2;
-        // Determine the Y coordinate for the text (note we add the ascent, as in java 2d 0 is top of the screen)
+
         int y = rect.y + ((rect.height - metrics.getHeight()) / 2) + metrics.getAscent();
-        // Set the font
-        g.setFont(font);
-        // Draw the String
-        g.drawString(text, x, y);
+
+        g2d.drawString(text, x, y);
     }
 
     @Override
